@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ant的所有内容必须包含在这个里边，name是你给它取的名字，basedir故名思意就是工作的根目录 .代表当前目录。
+default代表默认要做的事情。  -->
+<project name="HelloAnt" default="run" basedir=".">
+    <property name="mySrc" value="src"/>
+    <property name="myClassDirName" value="classes"/>
+    <property name="myBuildJarName" value="helloant.jar"/>
+
+    <!-- 
+    第一步：初始化
+        把你想做的每一件事情写成一个target ，它有一个名字，depends是它所依赖的target，在执行这个target 
+        例如这里的compile之前ant会先检查init是否曾经被执行过，如果执行过则直接直接执行compile，如果没有则会先执行它依赖的target例如这里的init，
+        然后在执行这个target如我们的计划  
+    -->
+    <target name="init">
+        <!-- 为了不用拷贝，我们可以在最开始定义好目标文件夹，这样ant直接把结果就放在目标文件夹中了 
+        新建文件夹:
+       <mkdir dir="${basedir}/bulid"/>
+        -->
+       
+       <mkdir dir="${basedir}/${myClassDirName}"/>
+    </target>
+
+
+    <!-- 
+    第2步：编译
+    -->
+    <target name="compile" depends="init">
+        <!-- 
+            includeantruntime="false"、
+            解决：
+       [javac] E:\04-scala_eclipse\01-work\Hello\build.xml:46: warning: 'includeantruntime' was not set, defaulting to build.sysclasspath=last; set to false for repeatable builds
+        -->
+       <javac srcdir="${mySrc}" destdir="${myClassDirName}" includeantruntime="false" />
+    </target>
+
+
+
+
+    <!-- 
+    第3步：做jar包
+    -->
+    <target name="build" depends="compile">
+        <!--
+            Could not find com.phei.netty.protocol.http.xml.Test. Make sure you have it in your classpath
+            主要是解决：
+                /Hello/classes 目录的，编译后的.class文件存放位置
+       <jar jarfile="${myBuildJarName}" basedir="${myClassDirName}"/>        
+       <jar destfile="${basedir}/bulid/${myBuildJarName}" />         
+         -->
+       <jar jarfile="${basedir}/lib/${myBuildJarName}" basedir="${myClassDirName}"/>
+        <!-- 创建生成的jar包存放位置 /Hello/bulid/helloant.jar -->
+    </target>
+
+
+    <!-- 
+    第3步：运行
+    -->
+    <target name="run" depends="clean,build">
+       <java classname="com.ant.test.HelloAnt" classpath="${basedir}/lib/${myBuildJarName}"/>
+    </target>
+
+    <!-- 重新运行  -->
+    <target name="rerun" depends="run">
+       <ant target="clean" />
+       <ant target="run" />
+    </target>
+
+    <!-- 
+        每次运行前清空，以前运行的东西，比如生成的jar包，编译的.class文件
+    -->
+    <target name="clean">
+       <delete dir="${myClassDirName}" />
+       <delete file="${basedir}/lib/${myBuildJarName}" />
+    </target>
+
+</project>
